@@ -1,0 +1,26 @@
+18.4.2014
+
+Heute gelernt
+
+- Eigene Typen definieren
+Wann type und wann data ist noch nicht klar
+
+- Zufallszahlen
+Es gibt Zufallszahlengeneratoren, und die Klasse Random, deren Verwendung ich noch nicht verstehe.
+
+-IO Monaden
+<- heißt bind und holt Werte aus Monaden heraus, aber nur in do Blocks. 
+
+- Heute habe ich main und IO Monaden das erste mal erfolgreich benutzt. Morgen weiter mit 
+
+- Hashmaps:
+  - Wie erstellen, einfügen , abfragen
+  - Wie hält man so ein Ding persistent (Wahrscheinlich in main erstellen und einfach immer weiterreichen)
+
+27.4.2014
+
+RandomGen und Random halbwegs kapiert
+
+RandomGen erzaugt Integerzufallszahlen (der Typ ist eigentlich egal), Random erzeugt daraus dann Typspezifische Objekte (Je nach Instanz)
+
+Random ist dabei ungefähr als Iterator zu verstehen. Deswegen liefert die random-Funktion immer einen neuen "Random"-Wert zurück 
