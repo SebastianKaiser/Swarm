@@ -20,7 +20,8 @@ display angle pos gwRef = do
     scale 0.2 0.2 (0.2::GLfloat)
     let boids = GW.getBoids gw 
     forM_ boids $ \boid -> preservingMatrix $ do
-----       rotate a $ GW.orientation boid
+      let orient = Boid.orientation boid
+      rotate (Boid.angle orient) $ (Boid.direction orient)
       translate $ Boid.position boid
       cube 0.1
   swapBuffers 
