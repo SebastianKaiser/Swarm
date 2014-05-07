@@ -6,6 +6,7 @@ import Data.IORef
 import SwopenGL.Cube
 import SwopenGL.Points
 import qualified SwarmLogic.GameWorld as GW
+import qualified SwarmLogic.Boid as Boid
 import Data.Vect.Double
 import Debug.Trace
 import Data.List
@@ -20,7 +21,7 @@ display angle pos gwRef = do
     let boids = GW.getBoids gw 
     forM_ boids $ \boid -> preservingMatrix $ do
 ----       rotate a $ GW.orientation boid
-      translate $ GW.position boid
+      translate $ Boid.position boid
       cube 0.1
   swapBuffers 
 
