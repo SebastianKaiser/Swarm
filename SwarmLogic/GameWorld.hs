@@ -44,20 +44,17 @@ initGameWorld noOfBoids =
       gen  <- newStdGen
       return $ createGameWorld noOfBoids gen
 
-randomlist:: (Random b) => Int -> StdGen -> [b]
-randomlist n = 
-    take n . List.unfoldr (Just . random )
-
 createGameWorld:: Int -> StdGen -> GameWorld
-createGameWorld noOfBoids gen =  
-    insertAllBoids $ randomlist noOfBoids gen  
+createGameWorld n gen =
+    let rl = take n . List.unfoldr (Just . random ) in
+    insertAllBoids $ rl gen   
 
 deleteBoid:: Boid.Boid -> GameWorld -> GameWorld
 deleteBoid boid gw =
     let Vector3 x y z = Boid.position boid 
-        xm = deleteBoidC boid (\b -> x * 256) $ xmap gw
-        ym = deleteBoidC boid (\b -> y * 256) $ ymap gw       
-        zm = deleteBoidC boid (\b -> z * 256) $ zmap gw in
+        xm = deleteBoidC boid (\b -> x * maxCoordinate) $ xmap gw
+        ym = deleteBoidC boid (\b -> y * maxCoordinate) $ ymap gw       
+        zm = deleteBoidC boid (\b -> z * maxCoordinate) $ zmap gw in
     GameWorld xm ym zm
 
 deleteBoidC:: (RealFrac a) => Boid.Boid -> (Boid.Boid -> a) 
@@ -72,15 +69,18 @@ insertAllBoids rs =
 insertBoid:: Boid.Boid -> GameWorld -> GameWorld
 insertBoid boid gw = 
     let Vector3 x y z = Boid.position boid in
-    let xm = insertBoidC boid (\b -> x * 256) $ xmap gw
-        ym = insertBoidC boid (\b -> y * 256) $ ymap gw       
-        zm = insertBoidC boid (\b -> z * 256) $ zmap gw in
+    let xm = insertBoidC boid (\b -> x * maxCoordinate) $ xmap gw
+        ym = insertBoidC boid (\b -> y * maxCoordinate) $ ymap gw       
+        zm = insertBoidC boid (\b -> z * maxCoordinate) $ zmap gw in
     GameWorld xm ym zm
 
 insertBoidC:: (RealFrac a) => Boid.Boid -> (Boid.Boid -> a) 
            -> Map Integer Boid.Boid -> Map Integer Boid.Boid
 insertBoidC boid f hm = 
     Map.insert (floor $ f boid) boid hm
+
+maxCoordinate::GLdouble
+maxCoordinate = 512
 
 moveOn:: GameWorld -> GameWorld
 moveOn gw = 
