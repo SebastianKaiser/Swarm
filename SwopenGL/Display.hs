@@ -17,17 +17,20 @@ display angle pos gwRef = do
   clear [ColorBuffer, DepthBuffer] 
   loadIdentity
   preservingMatrix $ do
-    scale 0.2 0.2 (0.2::GLfloat)
+    scale 0.5 0.5 (0.5::GLfloat)
     let boids = GW.getBoids gw 
     forM_ boids $ \boid -> preservingMatrix $ do
+      color $ Color3 (1::GLfloat) 1 1 
       let orient = Boid.orientation boid
-      rotate (Boid.angle orient) $ (Boid.direction orient)
+      rotate ((Boid.angle orient)*360) $ (Boid.direction orient)
       translate $ Boid.position boid
       cube 0.1
+      color $ Color3 (0::GLfloat) 0 0 -- set outline color to black
+      cubeFrame 0.1 -- draw the outline
   swapBuffers 
 
-idle :: IORef GLfloat -> IORef GLfloat -> IdleCallback
-idle angle delta = do
-  d <- get delta
-  angle $~! (+ d)
+idle :: IORef GW.GameWorld -> IdleCallback
+idle gwRef = do
+  gw <- get gwRef
+  writeIORef gwRef $ GW.moveOn gw
   postRedisplay Nothing

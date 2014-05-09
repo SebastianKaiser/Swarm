@@ -5,12 +5,14 @@ module SwarmLogic.Boid
 ,velocity
 ,orientation
 ,direction
-,angle)
+,angle
+,rotateBoid)
 where
 
 import Graphics.Rendering.OpenGL.Raw.Types
 import Graphics.Rendering.OpenGL.GL.Tensor
 import System.Random
+import Debug.Trace
 
 type Direction = Vector3 GLdouble
 
@@ -46,9 +48,9 @@ instance Random Boid where
         (Boid pos vel or, ng) 
 
     randomR (min, max) g = 
-        let (pos, g2 ) =  randomR (position min, position max) g
-            (vel, g3 ) =  randomR (velocity min, velocity max) g2
-            (or, ng ) = randomR (orientation min, orientation max) g3 in
+        let (pos, g2) =  randomR (position min, position max) g
+            (vel, g3) =  randomR (velocity min, velocity max) g2
+            (or, ng) = randomR (orientation min, orientation max) g3 in
         (Boid pos vel or, ng) 
 
 -- Random instance for Vector3  
@@ -70,3 +72,10 @@ instance (Num a, Random a) => Random (Vector3 a) where
           in                          
             (Vector3 x y z, ng)
 
+rotateBoid :: Boid -> Boid
+rotateBoid (Boid pos vel orient) =
+    let newAngle = if angle orient < 1 
+                   then (angle orient + 0.00001) 
+                   else 0 :: GLdouble 
+        dir = direction orient in
+    (Boid pos vel (Orientation newAngle dir))

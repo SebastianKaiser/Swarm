@@ -1,9 +1,12 @@
 module SwarmLogic.GameWorld
-( GameWorld,
- createGameWorld,
- getBoids)
+( GameWorld
+, createGameWorld
+, getBoids
+, moveOn
+)
 where
 
+import Debug.Hood.Observe
 import Graphics.Rendering.OpenGL.Raw.Types
 import Graphics.Rendering.OpenGL.GL.Tensor
 import qualified SwarmLogic.Boid as Boid
@@ -12,6 +15,7 @@ import System.Random
 import qualified Data.Map as Map 
 import Data.Map.Strict
 import Data.Traversable
+import Debug.Trace
 
 -- Gameworld
 data GameWorld = 
@@ -35,16 +39,35 @@ instance GameAccess GameWorld where
 
 -- code
 initGameWorld:: Int -> IO GameWorld
-initGameWorld noOfBoids = do
-  gen  <- newStdGen
-  return $ createGameWorld noOfBoids gen
+initGameWorld noOfBoids = 
+    do
+      gen  <- newStdGen
+      return $ createGameWorld noOfBoids gen
 
 randomlist:: (Random b) => Int -> StdGen -> [b]
-randomlist n = take n . List.unfoldr (Just . random )
+randomlist n = 
+    take n . List.unfoldr (Just . random )
 
 createGameWorld:: Int -> StdGen -> GameWorld
-createGameWorld noOfBoids gen =  let rs = randomlist noOfBoids gen :: [Boid.Boid] in
-                       List.foldl (\gw b -> insertBoid b gw) SwarmLogic.GameWorld.empty rs 
+createGameWorld noOfBoids gen =  
+    insertAllBoids $ randomlist noOfBoids gen  
+
+deleteBoid:: Boid.Boid -> GameWorld -> GameWorld
+deleteBoid boid gw =
+    let Vector3 x y z = Boid.position boid 
+        xm = deleteBoidC boid (\b -> x * 256) $ xmap gw
+        ym = deleteBoidC boid (\b -> y * 256) $ ymap gw       
+        zm = deleteBoidC boid (\b -> z * 256) $ zmap gw in
+    GameWorld xm ym zm
+
+deleteBoidC:: (RealFrac a) => Boid.Boid -> (Boid.Boid -> a) 
+           -> Map Integer Boid.Boid -> Map Integer Boid.Boid
+deleteBoidC boid f hm = 
+    Map.delete (floor $ f boid) hm
+    
+insertAllBoids:: [Boid.Boid] -> GameWorld
+insertAllBoids rs =
+    List.foldl (\gw b -> insertBoid b gw) SwarmLogic.GameWorld.empty rs 
 
 insertBoid:: Boid.Boid -> GameWorld -> GameWorld
 insertBoid boid gw = 
@@ -52,22 +75,14 @@ insertBoid boid gw =
     let xm = insertBoidC boid (\b -> x * 256) $ xmap gw
         ym = insertBoidC boid (\b -> y * 256) $ ymap gw       
         zm = insertBoidC boid (\b -> z * 256) $ zmap gw in
-    GameWorld  xm ym zm
+    GameWorld xm ym zm
 
-insertBoidC:: (RealFrac a) => Boid.Boid -> (Boid.Boid -> a) -> Map Integer Boid.Boid -> Map Integer Boid.Boid
+insertBoidC:: (RealFrac a) => Boid.Boid -> (Boid.Boid -> a) 
+           -> Map Integer Boid.Boid -> Map Integer Boid.Boid
 insertBoidC boid f hm = 
-    let key = f $ boid in
-    Map.insert (floor key) boid hm
+    Map.insert (floor $ f boid) boid hm
 
-
-
-
-
-
-
-
-
-
-
-
-
+moveOn:: GameWorld -> GameWorld
+moveOn gw = 
+    let boids = getBoids gw in
+    insertAllBoids $ List.map (\b -> Boid.rotateBoid b) boids

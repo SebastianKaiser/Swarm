@@ -20,6 +20,6 @@ main = do
   delta <- newIORef 0.1
   pos <- newIORef (0, 0)
   keyboardMouseCallback $= Just (keyboardMouse delta pos)
-  idleCallback $= Just (idle angle delta)
+  idleCallback $= Just (idle gwRef)
   displayCallback $= display angle pos gwRef
   mainLoop
