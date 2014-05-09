@@ -22,7 +22,7 @@ display angle pos gwRef = do
     forM_ boids $ \boid -> preservingMatrix $ do
       color $ Color3 (1::GLfloat) 1 1 
       let orient = Boid.orientation boid
-      rotate ((Boid.angle orient)*360) $ (Boid.direction orient)
+      rotate ((Boid.angle orient)*360) $ Boid.direction orient
       translate $ Boid.position boid
       cube 0.1
       color $ Color3 (0::GLfloat) 0 0 -- set outline color to black
