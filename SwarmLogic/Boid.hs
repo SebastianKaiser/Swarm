@@ -6,18 +6,26 @@ module SwarmLogic.Boid
 ,orientation
 ,direction
 ,angle
-,rotateBoid)
+,rotateBoid
+,minBoid
+,maxBoid
+,avgVecList
+)
 where
 
+import Constants
+import Debug.Trace
+import qualified Data.Vect.Double as Vect
+import Data.Vect.Double.OpenGL
 import Graphics.Rendering.OpenGL.Raw.Types
 import Graphics.Rendering.OpenGL.GL.Tensor
 import System.Random
-import Debug.Trace
 
-type Direction = Vector3 GLdouble
+type Direction = Vect.Vec3
 
 data Orientation = Orientation
-    { angle :: GLdouble
+    { angle :: Double
+    , angVel :: Double
     , direction :: Direction
     } deriving (Show)
 
@@ -27,17 +35,41 @@ data Boid = Boid
     , orientation :: Orientation
     } deriving (Show)
 
+maxBoid::Boid
+maxBoid = Boid { position = 
+                     (Vect.Vec3 maxCoord maxCoord 0),
+                 velocity = 
+                     Vect.Vec3 (0.5) (0.5) (0.5),
+                 orientation = 
+                     Orientation { angle = 359,
+                                   angVel = 0.01,
+                                   direction = (Vect.Vec3 maxCoord maxCoord 0)} 
+               }
+
+minBoid::Boid
+minBoid = Boid { position = 
+                     (Vect.Vec3 minCoord minCoord 0),
+                 velocity = 
+                     Vect.Vec3 (-0.5) (-0.5) (-0.5),
+                 orientation = 
+                     Orientation { angle = 0, 
+                                   angVel = -0.01,
+                                   direction = (Vect.Vec3 minCoord minCoord 0)} 
+               }
+                            
 -- creation of random orientation
 instance Random Orientation where
     random g =
         let (ang, g2) = random g
-            (dir, ng) = random g2 in
-        (Orientation ang dir,  ng)
+            (anv, g3) = random g2
+            (dir, ng) = random g3 in
+        (Orientation ang anv dir,  ng)
 
     randomR (min, max) g =
         let (ang, g2) = randomR (angle min, angle max) g
-            (dir, ng) = randomR (direction min, direction max) g2 in
-        (Orientation ang dir, ng)
+            (anv, g3) = randomR (angVel min, angVel max) g2
+            (dir, ng) = randomR (direction min, direction max) g3 in
+        (Orientation ang anv dir, ng)
 
 -- creation of random boid
 instance Random Boid where
@@ -53,29 +85,22 @@ instance Random Boid where
             (or, ng) =  randomR (orientation min, orientation max) g3 in
         (Boid pos vel or, ng) 
 
--- Random instance for Vector3  
-instance (Num a, Random a) => Random (Vector3 a) where
-    random g = 
-        let (x,g2) = random g
-            (y,g3) = random g2
-            (z,ng) = random g3        
-        in                          
-          (Vector3 x y z, ng)
-               
-    randomR (min, max) g = 
-        let Vector3 min_x min_y min_z = min
-            Vector3 max_x max_y max_z = max
-        in
-          let (x,g2) = randomR (min_x, max_x) g
-              (y,g3) = randomR (min_y, max_y) g2
-              (z,ng) = randomR (min_z, max_z) g3       
-          in                          
-            (Vector3 x y z, ng)
-
 rotateBoid :: Boid -> Boid
 rotateBoid (Boid pos vel orient) =
-    let newAngle = if angle orient < 1 
-                   then (angle orient + 0.00001) 
-                   else 0 :: GLdouble 
+    let newAngle = if angle orient < 360 
+                   then (angle orient + angVel orient) 
+                   else 0 
+        newAngVel = angVel orient
         dir = direction orient in
-    (Boid pos vel (Orientation newAngle dir))
+    (Boid pos vel (Orientation newAngle newAngVel dir))
+
+extractBoidValList:: [Boid] -> (Boid -> Vect.Vec3) -> Vect.Vec3
+extractBoidValList xs f = sumVecList $ map f xs 
+
+sumVecList:: [Vect.Vec3] -> Vect.Vec3
+sumVecList xs = foldl (Vect.&+) Vect.zero xs
+
+avgVecList:: [Vect.Vec3] -> Vect.Vec3
+avgVecList xs = 
+   let len = (fromIntegral $ length xs) in
+        (1 / len) Vect.*& (sumVecList xs)    

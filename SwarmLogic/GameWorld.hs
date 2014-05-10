@@ -3,19 +3,23 @@ module SwarmLogic.GameWorld
 , createGameWorld
 , getBoids
 , moveOn
+, maxCoord
+, minCoord
 )
 where
 
+import Debug.Trace
 import Debug.Hood.Observe
-import Graphics.Rendering.OpenGL.Raw.Types
+
+import Constants
 import Graphics.Rendering.OpenGL.GL.Tensor
+import qualified Data.Vect.Double as Vect
+import Data.Vect.Double.OpenGL
 import qualified SwarmLogic.Boid as Boid
 import qualified Data.List as List
 import System.Random
 import qualified Data.Map as Map 
 import Data.Map.Strict
-import Data.Traversable
-import Debug.Trace
 
 -- Gameworld
 data GameWorld = 
@@ -44,17 +48,22 @@ initGameWorld noOfBoids =
       gen  <- newStdGen
       return $ createGameWorld noOfBoids gen
 
+randomBoid:: RandomGen g => g -> (Boid.Boid, g)
+randomBoid g =
+    let (newBoid, ng) = randomR (Boid.minBoid, Boid.maxBoid) g in
+    trace (show $ Boid.position newBoid) $ (newBoid, ng)
+
 createGameWorld:: Int -> StdGen -> GameWorld
 createGameWorld n gen =
-    let rl = take n . List.unfoldr (Just . random ) in
+    let rl = take n . List.unfoldr (Just . randomBoid ) in
     insertAllBoids $ rl gen   
 
 deleteBoid:: Boid.Boid -> GameWorld -> GameWorld
 deleteBoid boid gw =
-    let Vector3 x y z = Boid.position boid 
-        xm = deleteBoidC boid (\b -> x * maxCoordinate) $ xmap gw
-        ym = deleteBoidC boid (\b -> y * maxCoordinate) $ ymap gw       
-        zm = deleteBoidC boid (\b -> z * maxCoordinate) $ zmap gw in
+    let Vect.Vec3 x y z = Boid.position boid 
+        xm = deleteBoidC boid (\b -> x ) $ xmap gw
+        ym = deleteBoidC boid (\b -> y ) $ ymap gw       
+        zm = deleteBoidC boid (\b -> z ) $ zmap gw in
     GameWorld xm ym zm
 
 deleteBoidC:: (RealFrac a) => Boid.Boid -> (Boid.Boid -> a) 
@@ -68,19 +77,16 @@ insertAllBoids rs =
 
 insertBoid:: Boid.Boid -> GameWorld -> GameWorld
 insertBoid boid gw = 
-    let Vector3 x y z = Boid.position boid in
-    let xm = insertBoidC boid (\b -> x * maxCoordinate) $ xmap gw
-        ym = insertBoidC boid (\b -> y * maxCoordinate) $ ymap gw       
-        zm = insertBoidC boid (\b -> z * maxCoordinate) $ zmap gw in
+    let Vect.Vec3 x y z = Boid.position boid in
+    let xm = insertBoidC boid (\b -> x ) $ xmap gw
+        ym = insertBoidC boid (\b -> y ) $ ymap gw       
+        zm = insertBoidC boid (\b -> z ) $ zmap gw in
     GameWorld xm ym zm
 
 insertBoidC:: (RealFrac a) => Boid.Boid -> (Boid.Boid -> a) 
            -> Map Integer Boid.Boid -> Map Integer Boid.Boid
 insertBoidC boid f hm = 
     Map.insert (floor $ f boid) boid hm
-
-maxCoordinate::GLdouble
-maxCoordinate = 512
 
 moveOn:: GameWorld -> GameWorld
 moveOn gw = 
