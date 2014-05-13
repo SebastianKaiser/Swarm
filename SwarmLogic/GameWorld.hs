@@ -10,7 +10,6 @@ where
 
 import Debug.Trace
 import Debug.Hood.Observe
-
 import Constants
 import Graphics.Rendering.OpenGL.GL.Tensor
 import qualified Data.Vect.Double as Vect
@@ -49,10 +48,11 @@ initGameWorld noOfBoids =
       return $ createGameWorld noOfBoids gen
 
 randomBoid:: RandomGen g => g -> (Boid.Boid, g)
-randomBoid g =
-    let (newBoid, ng) = randomR (Boid.minBoid, Boid.maxBoid) g in
-    trace (show $ Boid.position newBoid) $ (newBoid, ng)
-
+randomBoid g = randomR (Boid.minBoid, Boid.maxBoid) g
+--     
+-- let (ret, ng) =  in
+-- trace (show ret) (ret, ng)
+ 
 createGameWorld:: Int -> StdGen -> GameWorld
 createGameWorld n gen =
     let rl = take n . List.unfoldr (Just . randomBoid ) in
@@ -61,9 +61,9 @@ createGameWorld n gen =
 deleteBoid:: Boid.Boid -> GameWorld -> GameWorld
 deleteBoid boid gw =
     let Vect.Vec3 x y z = Boid.position boid 
-        xm = deleteBoidC boid (\b -> x ) $ xmap gw
-        ym = deleteBoidC boid (\b -> y ) $ ymap gw       
-        zm = deleteBoidC boid (\b -> z ) $ zmap gw in
+        xm = deleteBoidC boid (\b -> x * 256) $ xmap gw
+        ym = deleteBoidC boid (\b -> y * 256) $ ymap gw       
+        zm = deleteBoidC boid (\b -> z * 256) $ zmap gw in
     GameWorld xm ym zm
 
 deleteBoidC:: (RealFrac a) => Boid.Boid -> (Boid.Boid -> a) 
@@ -78,9 +78,9 @@ insertAllBoids rs =
 insertBoid:: Boid.Boid -> GameWorld -> GameWorld
 insertBoid boid gw = 
     let Vect.Vec3 x y z = Boid.position boid in
-    let xm = insertBoidC boid (\b -> x ) $ xmap gw
-        ym = insertBoidC boid (\b -> y ) $ ymap gw       
-        zm = insertBoidC boid (\b -> z ) $ zmap gw in
+    let xm = insertBoidC boid (\b -> x * 256) $ xmap gw
+        ym = insertBoidC boid (\b -> y * 256) $ ymap gw       
+        zm = insertBoidC boid (\b -> z * 256) $ zmap gw in
     GameWorld xm ym zm
 
 insertBoidC:: (RealFrac a) => Boid.Boid -> (Boid.Boid -> a) 
@@ -91,4 +91,7 @@ insertBoidC boid f hm =
 moveOn:: GameWorld -> GameWorld
 moveOn gw = 
     let boids = getBoids gw in
-    insertAllBoids $ List.map (\b -> Boid.rotateBoid b) boids
+    insertAllBoids $ List.map (\b -> moveBoid b) boids
+
+moveBoid:: Boid.Boid -> Boid.Boid
+moveBoid boid = Boid.rotateBoid boid

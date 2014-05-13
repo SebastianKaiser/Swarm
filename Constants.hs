@@ -6,7 +6,8 @@ where
 import Graphics.Rendering.OpenGL.Raw.Types
 
 maxCoord::Double
-maxCoord = 1
+maxCoord = 5
 
 minCoord::Double
-minCoord = -1 -- -maxCoord
+minCoord = -maxCoord
+

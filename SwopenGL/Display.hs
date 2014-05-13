@@ -11,9 +11,10 @@ import Data.Vect.Double
 import Data.Vect.Double.OpenGL
 import Debug.Trace
 import Data.List
- 
-display :: IORef GLfloat -> IORef (GLfloat, GLfloat) -> IORef GW.GameWorld -> DisplayCallback
-display angle pos gwRef = do
+import Graphics.Rendering.OpenGL.GLU.Matrix
+
+display :: IORef GW.GameWorld -> DisplayCallback
+display gwRef = do
   gw <- get gwRef 
   clear [ColorBuffer, DepthBuffer] 
   loadIdentity
@@ -22,9 +23,10 @@ display angle pos gwRef = do
     let boids = GW.getBoids gw 
     forM_ boids $ \boid -> preservingMatrix $ do
       color $ Color3 (1::GLfloat) 1 1 
-      let orient = Boid.orientation boid
-      glTranslate $ Boid.position boid
-      glRotate ((Boid.angle orient)) $ Boid.direction orient
+      let pos = Boid.position boid 
+      glTranslate pos
+      let orient = Boid.orientation boid 
+      glRotate (Boid.angle orient) $ Boid.direction orient
       cube 0.1
       color $ Color3 (0::GLfloat) 0 0 -- set outline color to black
       cubeFrame 0.1 -- draw the outline
@@ -33,5 +35,6 @@ display angle pos gwRef = do
 idle :: IORef GW.GameWorld -> IdleCallback
 idle gwRef = do
   gw <- get gwRef
+  --print $ show $ Boid.avgVecList $ map Boid.position $ GW.getBoids gw
   writeIORef gwRef $ GW.moveOn gw
   postRedisplay Nothing
