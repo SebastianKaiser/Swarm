@@ -26,6 +26,8 @@ display gwRef = do
       modelView       = model !*! camMat
 
   modelView `asUniform` modelViewLoc 
+
+  drawArrays LineLoop 0 3
   swapBuffers 
 
 idle :: IORef GW.GameWorld -> IdleCallback

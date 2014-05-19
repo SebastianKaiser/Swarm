@@ -5,6 +5,7 @@ idle
 , keyboardMouse
 , initShader
 , installShaders
+, setProjMatrix
 ) where
  
 import Graphics.UI.GLUT
@@ -22,6 +23,10 @@ import Data.Maybe
 reshape :: ReshapeCallback
 reshape (GL.Size w h) = do
   GL.viewport $= (GL.Position 0 0, GL.Size (fromIntegral w) (fromIntegral h))
+  setProjMatrix (GL.Size w h)
+
+setProjMatrix :: Size -> IO ()
+setProjMatrix (GL.Size w h) = do
   prog <- get currentProgram
   projLoc <- get $ uniformLocation (fromJust prog) "Projection"
   let ratio = (fromIntegral w)/(fromIntegral h)::GLfloat
@@ -31,7 +36,7 @@ keyboardMouse :: KeyboardMouseCallback
 keyboardMouse (Char '\27') Down _ _ = exitWith ExitSuccess
 keyboardMouse _ _ _ _ = return ()
 
-initShader::  ShaderType -> FilePath -> IO Shader
+initShader:: ShaderType -> FilePath -> IO Shader
 initShader shdrType path = do
   src <- BS.readFile path
   shdr <- createShader shdrType
@@ -63,17 +68,9 @@ installShaders shaders = do
                            loc <- get $ uniformLocation prog var
                            reportErrors
                            uniform loc $= val
-
-
-   setUniform "BrickColor" (Color3 1.0 0.3 (0.2 :: GLfloat))
-   setUniform "MortarColor" (Color3 0.85 0.86 (0.84 :: GLfloat))
-   setUniform "BrickSize" (Vertex2 0.30 (0.15 :: GLfloat))
-   setUniform "BrickPct" (Vertex2 0.90 (0.85 :: GLfloat))
-   -- setUniform "LightPosition" (Vertex3 0 0 (4 :: GLfloat))
+  --   setUniform "BrickColor" (Color3 1.0 0.3 (0.2 :: GLfloat))
+  --   setUniform "MortarColor" (Color3 0.85 0.86 (0.84 :: GLfloat))
+  --   setUniform "BrickSize" (Vertex2 0.30 (0.15 :: GLfloat))
+  --   setUniform "BrickPct" (Vertex2 0.90 (0.85 :: GLfloat))
+  --   setUniform "LightPosition" (Vertex3 0 0 (4 :: GLfloat))
    return prog
-
--- setUniform:: Program -> String -> a -> IO ()
--- setUniform prog var val = do
---        location <- get $ uniformLocation prog var
---        reportErrors
---        uniform location $= val

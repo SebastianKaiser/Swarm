@@ -7,6 +7,7 @@ import SwarmLogic.GameWorld
 import Graphics.Rendering.OpenGL
 import Graphics.Rendering.OpenGL.GL.VertexArrays
 import Graphics.GLUtil.BufferObjects
+import Graphics.GLUtil.VertexArrayObjects
 import Linear.Vector
 import Linear.V4
 
@@ -18,18 +19,19 @@ main = do
   gwRef <- newIORef gw
 
   initOpenGl gwRef  
+
   shdrVert <- initShader VertexShader "./resources/ModelViewShader.vert"
   shdrFrag <- initShader FragmentShader "./resources/FragShader.frag" 
   prog <- installShaders [shdrVert, shdrFrag]
 
-  let vertArray = [ 0, 0, 0, 
-                    1, 0, 0,
-                    0, 1, 0 ]
+  let vertArray = [ 0, 0, -10, 
+                    1, 0, -10,
+                    0, 1, -10 ]
        
   let vertIndexArray = [1, 2, 3]
 
-  vbo <- vboOfList ElementArrayBuffer (length vertArray) vertArray StaticDraw
-  vio <- vboOfList ArrayBuffer (length vertIndexArray) vertIndexArray StaticDraw
+  vbo <- vboOfList ElementArrayBuffer (length vertIndexArray) vertIndexArray StaticDraw
+  vio <- vboOfList ArrayBuffer (length vertArray) vertArray StaticDraw
 
   let vertDesc = VertexArrayDescriptor 3 Float 0 offset0 
   arrayPointer VertexArray $= vertDesc
