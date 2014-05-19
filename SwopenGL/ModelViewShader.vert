@@ -1,10 +1,10 @@
-vec3 coord3d;
+#version 430
 
+layout (location = 0) in vec3 coord3d ;
+
+uniform mat4 ModelView;
 uniform mat4 Projection;
-//uniform mat4 Model;
-//uniform mat4 View;
-uniform mat4 Camera;
 
 void main(void) {
-  gl_Position = Projection * Camera * vec4(coord3d, 1.0);
+  gl_Position = ModelView * Projection * vec4(coord3d, 1.0);
 }

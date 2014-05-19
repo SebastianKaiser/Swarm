@@ -8,12 +8,8 @@ module SwarmLogic.GameWorld
 )
 where
 
-import Debug.Trace
-import Debug.Hood.Observe
 import Constants
-import Graphics.Rendering.OpenGL.GL.Tensor
 import qualified Data.Vect.Double as Vect
-import Data.Vect.Double.OpenGL
 import qualified SwarmLogic.Boid as Boid
 import qualified Data.List as List
 import System.Random
@@ -35,10 +31,10 @@ class GameAccess g where
 
 instance GameAccess GameWorld where
     empty = GameWorld Map.empty Map.empty Map.empty
-    xmap (GameWorld xmap _ _) = xmap
-    ymap (GameWorld _ ymap _) = ymap
-    zmap (GameWorld _ _ zmap) = zmap
-    getBoids (GameWorld xmap _ _) = elems xmap  
+    xmap (GameWorld xm _ _) = xm
+    ymap (GameWorld _ ym _) = ym
+    zmap (GameWorld _ _ zm) = zm
+    getBoids (GameWorld xm _ _) = elems xm  
 
 -- code
 initGameWorld:: Int -> IO GameWorld
@@ -61,9 +57,9 @@ createGameWorld n gen =
 deleteBoid:: Boid.Boid -> GameWorld -> GameWorld
 deleteBoid boid gw =
     let Vect.Vec3 x y z = Boid.position boid 
-        xm = deleteBoidC boid (\b -> x * 256) $ xmap gw
-        ym = deleteBoidC boid (\b -> y * 256) $ ymap gw       
-        zm = deleteBoidC boid (\b -> z * 256) $ zmap gw in
+        xm = deleteBoidC boid (\_ -> x * 256) $ xmap gw
+        ym = deleteBoidC boid (\_ -> y * 256) $ ymap gw       
+        zm = deleteBoidC boid (\_ -> z * 256) $ zmap gw in
     GameWorld xm ym zm
 
 deleteBoidC:: (RealFrac a) => Boid.Boid -> (Boid.Boid -> a) 
@@ -78,9 +74,9 @@ insertAllBoids rs =
 insertBoid:: Boid.Boid -> GameWorld -> GameWorld
 insertBoid boid gw = 
     let Vect.Vec3 x y z = Boid.position boid in
-    let xm = insertBoidC boid (\b -> x * 256) $ xmap gw
-        ym = insertBoidC boid (\b -> y * 256) $ ymap gw       
-        zm = insertBoidC boid (\b -> z * 256) $ zmap gw in
+    let xm = insertBoidC boid (\_ -> x * 256) $ xmap gw
+        ym = insertBoidC boid (\_ -> y * 256) $ ymap gw       
+        zm = insertBoidC boid (\_ -> z * 256) $ zmap gw in
     GameWorld xm ym zm
 
 insertBoidC:: (RealFrac a) => Boid.Boid -> (Boid.Boid -> a) 

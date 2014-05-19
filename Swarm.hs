@@ -1,8 +1,14 @@
 import Graphics.UI.GLUT
 import Data.IORef
+import Data.Array.Storable
 import SwopenGL.Bindings
 import System.Random
 import SwarmLogic.GameWorld
+import Graphics.Rendering.OpenGL
+import Graphics.Rendering.OpenGL.GL.VertexArrays
+import Graphics.GLUtil.BufferObjects
+import Linear.Vector
+import Linear.V4
 
 main :: IO ()
 main = do
@@ -12,19 +18,43 @@ main = do
   gwRef <- newIORef gw
 
   initOpenGl gwRef  
-  prog <- createProgram 
-  shdrVert <- initShader VertexShader "./SwopenGL/ModelViewShader.vert" 
-  shdrFrag <- initShader FragmentShader "./Brick.frag" 
+  shdrVert <- initShader VertexShader "./resources/ModelViewShader.vert"
+  shdrFrag <- initShader FragmentShader "./resources/FragShader.frag" 
   prog <- installShaders [shdrVert, shdrFrag]
+
+  let vertArray = [ 0, 0, 0, 
+                    1, 0, 0,
+                    0, 1, 0 ]
+       
+  let vertIndexArray = [1, 2, 3]
+
+  vbo <- vboOfList ElementArrayBuffer (length vertArray) vertArray StaticDraw
+  vio <- vboOfList ArrayBuffer (length vertIndexArray) vertIndexArray StaticDraw
+
+  let vertDesc = VertexArrayDescriptor 3 Float 0 offset0 
+  arrayPointer VertexArray $= vertDesc
+
+  clientState VertexArray $= Enabled
+  clientState IndexArray  $= Enabled
+
   mainLoop
+
+vboOfList :: BufferTarget -> Int -> [GLfloat] -> BufferUsage -> IO BufferObject
+vboOfList buffTarg size elems buffUse = do
+    let ptrsize = toEnum $ size * 4                -- toEnum macht aus Int GLsizei
+    (array:_) <- genObjectNames 1                  -- array Objectname
+    bindBuffer buffTarg  $= Just array             -- macht den Buffer bei OpenGL bekannt
+    arr <- newListArray (0, size - 1) elems        -- erzeugt ein mutable array aus elems
+    withStorableArray arr $ \ptr -> bufferData buffTarg $= (ptrsize, ptr,  buffUse)
+    return array
 
 initOpenGl:: IORef GameWorld -> IO ()
 initOpenGl gwRef = do 
   (_progName, _args) <- getArgsAndInitialize
   initialDisplayMode $= [WithDepthBuffer, DoubleBuffered]
   _window <- createWindow "Hello World"
-  reshapeCallback $= Just reshape
   depthFunc $= Just Less 
   keyboardMouseCallback $= Just (keyboardMouse)
+  reshapeCallback $= Just reshape
   idleCallback $= Just (idle gwRef)
   displayCallback $= display gwRef

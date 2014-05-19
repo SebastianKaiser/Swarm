@@ -14,11 +14,7 @@ module SwarmLogic.Boid
 where
 
 import Constants
-import Debug.Trace
 import qualified Data.Vect.Double as Vect
-import Data.Vect.Double.OpenGL
-import Graphics.Rendering.OpenGL.Raw.Types
-import Graphics.Rendering.OpenGL.GL.Tensor
 import System.Random
 
 type Direction = Vect.Vec3
@@ -65,10 +61,10 @@ instance Random Orientation where
             (dir, ng) = random g3 in
         (Orientation ang anv dir,  ng)
 
-    randomR (min, max) g =
-        let (ang, g2) = randomR (angle min, angle max) g
-            (anv, g3) = randomR (angVel min, angVel max) g2
-            (dir, ng) = randomR (direction min, direction max) g3 in
+    randomR (minO, maxO) g =
+        let (ang, g2) = randomR (angle minO, angle maxO) g
+            (anv, g3) = randomR (angVel minO, angVel maxO) g2
+            (dir, ng) = randomR (direction minO, direction maxO) g3 in
         (Orientation ang anv dir, ng)
 
 -- creation of random boid
@@ -76,14 +72,14 @@ instance Random Boid where
     random g = 
         let (pos, g2) = random g
             (vel, g3) = random g2 
-            (or, ng) =  random g3 in
-        (Boid pos vel or, ng) 
+            (orient, ng) =  random g3 in
+        (Boid pos vel orient, ng) 
 
-    randomR (min, max) g = 
-        let (pos, g2) = randomR (position min, position max) g
-            (vel, g3) = randomR (velocity min, velocity max) g2
-            (or, ng) =  randomR (orientation min, orientation max) g3 in
-        (Boid pos vel or, ng) 
+    randomR (minB, maxB) g = 
+        let (pos, g2) = randomR (position minB, position maxB) g
+            (vel, g3) = randomR (velocity minB, velocity maxB) g2
+            (orient, ng) =  randomR (orientation minB, orientation maxB) g3 in
+        (Boid pos vel orient, ng) 
 
 rotateBoid :: Boid -> Boid
 rotateBoid (Boid pos vel orient) =

@@ -3,7 +3,7 @@ module Constants
 ,maxCoord)
 where 
 
-import Graphics.Rendering.OpenGL.Raw.Types
+import Graphics.Rendering.OpenGL.Raw.Types()
 
 maxCoord::Double
 maxCoord = 5

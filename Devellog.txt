@@ -24,3 +24,12 @@ RandomGen und Random halbwegs kapiert
 RandomGen erzaugt Integerzufallszahlen (der Typ ist eigentlich egal), Random erzeugt daraus dann Typspezifische Objekte (Je nach Instanz)
 
 Random ist dabei ungefähr als Iterator zu verstehen. Deswegen liefert die random-Funktion immer einen neuen "Random"-Wert zurück 
+
+18.05.2014
+
+OpenGL
+
+VBOs sind die Buffer für Knotenattribute
+VAOs beschreiben die Organisation der Daten in den Buffern und die Verteilung auf die Shaderattribute
+
+Nur ums zu wiederholen: der Vertexshader kriegt jeweils nur Daten zu einem einzigen Knoten aus dem / den aktuellen (?) Buffer/n (?). Mittels VAOs wird festgelegt, welche das sind.

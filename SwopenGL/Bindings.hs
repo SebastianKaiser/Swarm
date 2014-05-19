@@ -8,13 +8,11 @@ idle
 ) where
  
 import Graphics.UI.GLUT
-import Data.IORef
 import SwopenGL.Display
 import qualified Graphics.Rendering.OpenGL as GL
 import System.Exit ( exitWith, ExitCode(..) )
 import Graphics.Rendering.OpenGL.GL.Shaders
 import qualified Data.ByteString as BS
-import System.Exit
 import System.IO
 import Control.Monad (when, unless)
 import Graphics.GLUtil.Camera3D
@@ -23,19 +21,11 @@ import Data.Maybe
  
 reshape :: ReshapeCallback
 reshape (GL.Size w h) = do
+  GL.viewport $= (GL.Position 0 0, GL.Size (fromIntegral w) (fromIntegral h))
   prog <- get currentProgram
   projLoc <- get $ uniformLocation (fromJust prog) "Projection"
   let ratio = (fromIntegral w)/(fromIntegral h)::GLfloat
   asUniform (projectionMatrix (1/2) ratio 0.1 100) projLoc
-  let cam = fpsCamera :: Camera GLfloat
-  camLoc <- get $ uniformLocation (fromJust prog) "Camera"
-  asUniform (camMatrix cam) camLoc
-  
-  
-
-  -- GL.viewport $= (GL.Position 0 0, GL.Size (fromIntegral w) (fromIntegral h))
-  -- GL.perspective 120 (fromIntegral w / fromIntegral h) 0.1 (-100)
-  -- GL.lookAt (Vertex3 0 0 0) (Vertex3 0 0 0) (Vector3 0 1 0)
 
 keyboardMouse :: KeyboardMouseCallback
 keyboardMouse (Char '\27') Down _ _ = exitWith ExitSuccess
@@ -69,12 +59,11 @@ installShaders shaders = do
       deleteObjectNames [prog]
       ioError (userError "linking failed")
    currentProgram $= Just prog
-                  
    let setUniform var val = do
-                           location <- get $ uniformLocation prog var
+                           loc <- get $ uniformLocation prog var
                            reportErrors
-                           uniform location $= val
-                  
+                           uniform loc $= val
+
 
    setUniform "BrickColor" (Color3 1.0 0.3 (0.2 :: GLfloat))
    setUniform "MortarColor" (Color3 0.85 0.86 (0.84 :: GLfloat))
