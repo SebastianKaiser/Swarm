@@ -21,8 +21,8 @@ import Graphics.Rendering.OpenGL(GLfloat)
 type Direction = Vect.V3 GLfloat
 
 data Orientation = Orientation
-    { angle :: GLfloat
-    , angVel :: GLfloat
+    { angVel :: GLfloat
+    , angle :: GLfloat
     , direction :: Direction
     } deriving (Show)
 
@@ -34,7 +34,7 @@ data Boid = Boid
 
 maxBoid::Boid
 maxBoid = Boid { position = 
-                     (Vect.V3 maxCoord maxCoord 0),
+                     (Vect.V3 maxCoord maxCoord maxCoord),
                  velocity = 
                      Vect.V3 (0.5) (0.5) (0.5),
                  orientation = 
@@ -45,7 +45,7 @@ maxBoid = Boid { position =
 
 minBoid::Boid
 minBoid = Boid { position = 
-                     (Vect.V3 minCoord minCoord 0),
+                     (Vect.V3 minCoord minCoord minCoord),
                  velocity = 
                      Vect.V3 (-0.5) (-0.5) (-0.5),
                  orientation = 
@@ -54,6 +54,7 @@ minBoid = Boid { position =
                                    direction = (Vect.V3 minCoord minCoord 0)} 
                }
                             
+-- Random instance for V3                            
 instance (Random t) => Random (Vect.V3 t) where
     random g = 
         let (x, g2) = random g
@@ -105,9 +106,6 @@ rotateBoid (Boid pos vel orient) =
         newAngVel = angVel orient
         dir = direction orient in
     (Boid pos vel (Orientation newAngle newAngVel dir))
-
-extractBoidValList:: [Boid] -> (Boid -> Vect.V3 GLfloat) -> Vect.V3 GLfloat
-extractBoidValList xs f = sumVecList $ map f xs 
 
 sumVecList:: [Vect.V3 GLfloat] -> Vect.V3 GLfloat
 sumVecList xs = Vect.sumV xs

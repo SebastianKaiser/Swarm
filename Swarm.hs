@@ -24,9 +24,9 @@ main = do
   shdrFrag <- initShader FragmentShader "./resources/FragShader.frag" 
   prog <- installShaders [shdrVert, shdrFrag]
 
-  let vertArray = [ 0, 0, -10, 
-                    1, 0, -10,
-                    0, 1, -10 ]
+  let vertArray = [ 0, 0, -50, 
+                    1, 0, -50,
+                    0, 1, -50]
        
   let vertIndexArray = [1, 2, 3]
 

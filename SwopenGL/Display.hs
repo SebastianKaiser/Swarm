@@ -8,7 +8,8 @@ import Graphics.GLUtil.Camera3D
 import Graphics.GLUtil.Linear
 import Data.Maybe
 import Linear.Matrix
-import Linear.V4
+import Linear.V3
+import Linear.Quaternion
 
 display :: IORef GW.GameWorld -> DisplayCallback
 display gwRef = do
@@ -18,11 +19,14 @@ display gwRef = do
 
   prog <- get currentProgram
   modelViewLoc <- get $ uniformLocation (fromJust prog) "ModelView"
-  let camMat          = camMatrix $ (fpsCamera ::Camera GLfloat)
+
+  let cam = dolly (V3 0 0 0) $ fpsCamera::Camera GLfloat
+      camMat = camMatrix cam
 
   mapM_ (\boid -> do 
-          let model  = mkTransformationMat eye3 (Boid.position boid)
-              modelView  = model !*! camMat
+          let quat = axisAngle (Boid.direction . Boid.orientation $ boid) (Boid.angle . Boid.orientation $ boid) 
+              model = mkTransformationMat eye3 (Boid.position boid)
+              modelView  = camMat !*! model 
           modelView `asUniform` modelViewLoc 
           drawArrays LineLoop 0 3 ) boids              
 
