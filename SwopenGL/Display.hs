@@ -19,20 +19,17 @@ display gwRef = do
   prog <- get currentProgram
   modelViewLoc <- get $ uniformLocation (fromJust prog) "ModelView"
   let camMat          = camMatrix $ (fpsCamera ::Camera GLfloat)
-      model           = V4 (V4 1 0 0 (0::GLfloat)) 
-                           (V4 0 1 0 (0::GLfloat)) 
-                           (V4 0 0 1 (0::GLfloat)) 
-                           (V4 0 0 0 (1::GLfloat))    
-      modelView       = model !*! camMat
 
-  modelView `asUniform` modelViewLoc 
+  mapM_ (\boid -> do 
+          let model  = mkTransformationMat eye3 (Boid.position boid)
+              modelView  = model !*! camMat
+          modelView `asUniform` modelViewLoc 
+          drawArrays LineLoop 0 3 ) boids              
 
-  drawArrays LineLoop 0 3
   swapBuffers 
 
 idle :: IORef GW.GameWorld -> IdleCallback
 idle gwRef = do
   gw <- get gwRef
-  --print $ show $ Boid.avgVecList $ map Boid.position $ GW.getBoids gw
   writeIORef gwRef $ GW.moveOn gw
   postRedisplay Nothing

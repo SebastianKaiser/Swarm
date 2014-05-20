@@ -3,11 +3,11 @@ module Constants
 ,maxCoord)
 where 
 
-import Graphics.Rendering.OpenGL.Raw.Types()
+import Graphics.Rendering.OpenGL(GLfloat)
 
-maxCoord::Double
+maxCoord::GLfloat
 maxCoord = 5
 
-minCoord::Double
+minCoord::GLfloat
 minCoord = -maxCoord
 

@@ -9,7 +9,7 @@ module SwarmLogic.GameWorld
 where
 
 import Constants
-import qualified Data.Vect.Double as Vect
+import qualified Linear.V3 as Vect
 import qualified SwarmLogic.Boid as Boid
 import qualified Data.List as List
 import System.Random
@@ -56,7 +56,7 @@ createGameWorld n gen =
 
 deleteBoid:: Boid.Boid -> GameWorld -> GameWorld
 deleteBoid boid gw =
-    let Vect.Vec3 x y z = Boid.position boid 
+    let Vect.V3 x y z = Boid.position boid 
         xm = deleteBoidC boid (\_ -> x * 256) $ xmap gw
         ym = deleteBoidC boid (\_ -> y * 256) $ ymap gw       
         zm = deleteBoidC boid (\_ -> z * 256) $ zmap gw in
@@ -73,7 +73,7 @@ insertAllBoids rs =
 
 insertBoid:: Boid.Boid -> GameWorld -> GameWorld
 insertBoid boid gw = 
-    let Vect.Vec3 x y z = Boid.position boid in
+    let Vect.V3 x y z = Boid.position boid in
     let xm = insertBoidC boid (\_ -> x * 256) $ xmap gw
         ym = insertBoidC boid (\_ -> y * 256) $ ymap gw       
         zm = insertBoidC boid (\_ -> z * 256) $ zmap gw in
