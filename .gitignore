@@ -1,3 +1,4 @@
 *.o
 *.*~
 *.hi
+*.sublime-workspace
