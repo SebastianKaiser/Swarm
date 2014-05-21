@@ -18,16 +18,19 @@ display gwRef = do
   let boids = GW.getBoids gw 
 
   prog <- get currentProgram
-  modelViewLoc <- get $ uniformLocation (fromJust prog) "ModelView"
+  modelLoc <- get $ uniformLocation (fromJust prog) "Model"
+  viewLoc <- get $ uniformLocation (fromJust prog) "View"
 
   let cam = dolly (V3 0 0 0) $ fpsCamera::Camera GLfloat
       camMat = camMatrix cam
+  camMat `asUniform` viewLoc
 
   mapM_ (\boid -> do 
           let quat = axisAngle (Boid.direction . Boid.orientation $ boid) (Boid.angle . Boid.orientation $ boid) 
-              model = mkTransformationMat eye3 (Boid.position boid)
+              model = mkTransformation quat (Boid.position boid)
+              --model = mkTransformationMat eye3 (Boid.position boid)
               modelView  = camMat !*! model 
-          modelView `asUniform` modelViewLoc 
+          model `asUniform` modelLoc 
           drawArrays LineLoop 0 3 ) boids              
 
   swapBuffers 
