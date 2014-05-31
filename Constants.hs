@@ -1,13 +1,19 @@
 module Constants 
 (minCoord
-,maxCoord)
+,maxCoord
+,SwarmFloat
+,SwarmM44)
 where 
 
 import Graphics.Rendering.OpenGL(GLfloat)
+import Linear(M44)
 
-maxCoord::GLfloat
-maxCoord = 5
+maxCoord:: SwarmFloat
+maxCoord = 10
 
-minCoord::GLfloat
+minCoord:: SwarmFloat
 minCoord = -maxCoord
 
+type SwarmFloat = GLfloat
+
+type SwarmM44 = M44 SwarmFloat

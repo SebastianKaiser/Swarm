@@ -10,48 +10,40 @@ module SwarmLogic.Boid
 ,minBoid
 ,maxBoid
 ,avgVecList
+,randomBoid
 )
 where
 
 import Constants
 import qualified Linear as Vect
 import System.Random
-import Graphics.Rendering.OpenGL(GLfloat)
-
-type Direction = Vect.V3 GLfloat
-
-data Orientation = Orientation
-    { angVel :: GLfloat
-    , angle :: GLfloat
-    , direction :: Direction
-    } deriving (Show)
+import SwarmLogic.SceneTree
 
 data Boid = Boid
-    { position :: Direction
-    , velocity :: Direction
+    { graphics :: Graphics
+    , position  :: Position
+    , velocity  :: Direction
     , orientation :: Orientation
     } deriving (Show)
 
-maxBoid::Boid
-maxBoid = Boid { position = 
-                     (Vect.V3 maxCoord maxCoord maxCoord),
-                 velocity = 
-                     Vect.V3 (0.5) (0.5) (0.5),
-                 orientation = 
-                     Orientation { angle = 359,
-                                   angVel = 0.01,
-                                   direction = (Vect.V3 maxCoord maxCoord 0)} 
+maxBoid::Boid  
+maxBoid = Boid {   graphics    = "bla", 
+                   position    = Vect.V3 maxCoord maxCoord maxCoord,
+                   velocity    = Vect.V3 (0.5) (0.5) (0.5),
+                   orientation = Orientation { angle = 0.003,
+                                               angVel = 0.0001,
+--                                               direction = (Vect.V3 maxCoord maxCoord 0)} 
+                                               direction = (Vect.V3 0 1 0)} 
                }
 
 minBoid::Boid
-minBoid = Boid { position = 
-                     (Vect.V3 minCoord minCoord minCoord),
-                 velocity = 
-                     Vect.V3 (-0.5) (-0.5) (-0.5),
-                 orientation = 
-                     Orientation { angle = 0, 
-                                   angVel = -0.01,
-                                   direction = (Vect.V3 minCoord minCoord 0)} 
+minBoid = Boid {   graphics    = "bla",
+                   position    = (Vect.V3 minCoord minCoord minCoord),
+                   velocity    = Vect.V3 (-0.5) (-0.5) (-0.5),
+                   orientation = Orientation { angle = -0.003, 
+                                               angVel = -0.0001,
+--                                               direction = (Vect.V3 minCoord minCoord 0)} 
+                                               direction = (Vect.V3 0 1 0)} 
                }
                             
 -- Random instance for V3                            
@@ -90,27 +82,27 @@ instance Random Boid where
         let (pos, g2) = random g
             (vel, g3) = random g2 
             (orient, ng) =  random g3 in
-        (Boid pos vel orient, ng) 
+        (Boid "Boid" pos vel orient, ng) 
 
     randomR (minB, maxB) g = 
         let (pos, g2) = randomR (position minB, position maxB) g
             (vel, g3) = randomR (velocity minB, velocity maxB) g2
             (orient, ng) =  randomR (orientation minB, orientation maxB) g3 in
-        (Boid pos vel orient, ng) 
+        (Boid "Boid" pos vel orient, ng) 
+
+randomBoid :: RandomGen g => g -> (Boid, g)
+randomBoid g = randomR (minBoid, maxBoid) g
 
 rotateBoid :: Boid -> Boid
-rotateBoid (Boid pos vel orient) =
-    let newAngle = if angle orient < 360 
-                   then (angle orient + angVel orient) 
-                   else 0 
-        newAngVel = angVel orient
-        dir = direction orient in
-    (Boid pos vel (Orientation newAngle newAngVel dir))
+rotateBoid (Boid _ pos vel orient) =
+    let (Orientation angV ang dir ) = orient
+        newAng = if ang < 1 then (ang + (angV/1000)) else 0 in
+    Boid "Boid" pos vel (Orientation angV newAng dir)
 
-sumVecList:: [Vect.V3 GLfloat] -> Vect.V3 GLfloat
+sumVecList :: [Vect.V3 SwarmFloat] -> Vect.V3 SwarmFloat
 sumVecList xs = Vect.sumV xs
 
-avgVecList:: [Vect.V3 GLfloat] -> Vect.V3 GLfloat
+avgVecList :: [Vect.V3 SwarmFloat] -> Vect.V3 SwarmFloat
 avgVecList xs = 
    let len = (fromIntegral $ length xs) in
         (1 / len) Vect.*^ (sumVecList xs)    

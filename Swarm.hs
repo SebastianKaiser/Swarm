@@ -4,18 +4,13 @@ import Data.Array.Storable
 import SwopenGL.Bindings
 import System.Random
 import SwarmLogic.GameWorld
-import Graphics.Rendering.OpenGL
-import Graphics.Rendering.OpenGL.GL.VertexArrays
 import Graphics.GLUtil.BufferObjects
-import Graphics.GLUtil.VertexArrayObjects
-import Linear.Vector
-import Linear.V4
 
 main :: IO ()
 main = do
   -- Gameworld
   gen  <- newStdGen
-  let gw = createGameWorld 50 gen
+  let gw = createGameWorld 4 gen
   gwRef <- newIORef gw
 
   initOpenGl gwRef  
@@ -24,11 +19,11 @@ main = do
   shdrFrag <- initShader FragmentShader "./resources/FragShader.frag" 
   prog <- installShaders [shdrVert, shdrFrag]
 
-  let vertArray = [ 0, 0, -50, 
-                    1, 0, -50,
-                    0, 1, -50]
+  let vertArray = [ 0, 0, 0, 
+                    0, 1, 0,
+                    1, 0, 0]
        
-  let vertIndexArray = [1, 2, 3]
+  let vertIndexArray = [3, 2, 1]
 
   vbo <- vboOfList ElementArrayBuffer (length vertIndexArray) vertIndexArray StaticDraw
   vio <- vboOfList ArrayBuffer (length vertArray) vertArray StaticDraw

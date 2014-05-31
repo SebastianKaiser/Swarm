@@ -30,7 +30,7 @@ setProjMatrix (GL.Size w h) = do
   prog <- get currentProgram
   projLoc <- get $ uniformLocation (fromJust prog) "Projection"
   let ratio = (fromIntegral w)/(fromIntegral h)::GLfloat
-  asUniform (projectionMatrix (1/2) ratio 0.1 (-100)) projLoc
+  asUniform (projectionMatrix (pi/4) ratio 0.1 (-20)) projLoc
 
 keyboardMouse :: KeyboardMouseCallback
 keyboardMouse (Char '\27') Down _ _ = exitWith ExitSuccess
