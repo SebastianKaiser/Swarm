@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-}
+
 module SwarmLogic.Boid 
 (Boid
 ,Orientation
@@ -11,40 +13,56 @@ module SwarmLogic.Boid
 ,maxBoid
 ,avgVecList
 ,randomBoid
+,boidGraphics
+,maxCoord
+,minCoord
 )
+
 where
 
 import Constants
-import qualified Linear as Vect
 import System.Random
-import SwarmLogic.SceneTree
+import Debug.Trace
+import qualified Linear as Vect
 
 data Boid = Boid
-    { graphics :: Graphics
-    , position  :: Position
-    , velocity  :: Direction
+    { graphics    :: Graphics
+    , position    :: Constants.Position
+    , velocity    :: Direction
     , orientation :: Orientation
-    } deriving (Show)
+    } 
 
 maxBoid::Boid  
-maxBoid = Boid {   graphics    = "bla", 
+maxBoid = Boid {   graphics    = boidGraphics, 
                    position    = Vect.V3 maxCoord maxCoord maxCoord,
                    velocity    = Vect.V3 (0.5) (0.5) (0.5),
-                   orientation = Orientation { angle = 0.003,
-                                               angVel = 0.0001,
---                                               direction = (Vect.V3 maxCoord maxCoord 0)} 
-                                               direction = (Vect.V3 0 1 0)} 
+                   orientation = Orientation { angVel    = 0.0001,
+                                               angle     = 0.03,
+                                               direction = (Vect.V3 maxCoord maxCoord 0)
+                                             } 
                }
 
 minBoid::Boid
-minBoid = Boid {   graphics    = "bla",
+minBoid = Boid {   graphics    = boidGraphics,
                    position    = (Vect.V3 minCoord minCoord minCoord),
                    velocity    = Vect.V3 (-0.5) (-0.5) (-0.5),
-                   orientation = Orientation { angle = -0.003, 
-                                               angVel = -0.0001,
---                                               direction = (Vect.V3 minCoord minCoord 0)} 
-                                               direction = (Vect.V3 0 1 0)} 
+                   orientation = Orientation { angVel    = -0.0001,
+                                               angle     = -0.03,
+                                               direction = (Vect.V3 minCoord minCoord 0)
+                                             } 
                }
+
+vertArray :: [SwarmFloat]
+vertArray =  [0, 0, 0, 
+              0, 1, 0,
+              1, 0, 0]
+
+vertIndexArray :: [SwarmFloat]
+vertIndexArray =  [3, 2, 1]
+
+boidGraphics :: Graphics
+boidGraphics = Graphics { vertexArray  = vertArray
+                        , indexArray   = vertIndexArray}
                             
 -- Random instance for V3                            
 instance (Random t) => Random (Vect.V3 t) where
@@ -82,13 +100,19 @@ instance Random Boid where
         let (pos, g2) = random g
             (vel, g3) = random g2 
             (orient, ng) =  random g3 in
-        (Boid "Boid" pos vel orient, ng) 
+        (Boid boidGraphics pos vel orient, ng) 
 
     randomR (minB, maxB) g = 
         let (pos, g2) = randomR (position minB, position maxB) g
             (vel, g3) = randomR (velocity minB, velocity maxB) g2
             (orient, ng) =  randomR (orientation minB, orientation maxB) g3 in
-        (Boid "Boid" pos vel orient, ng) 
+        (Boid boidGraphics pos vel orient, ng) 
+
+instance Show Boid where
+    show boid = "Boid " 
+                ++ (show $ position boid) ++ "\n " 
+                ++ (show $ velocity boid) ++ "\n" 
+                ++ (show $ orientation boid)
 
 randomBoid :: RandomGen g => g -> (Boid, g)
 randomBoid g = randomR (minBoid, maxBoid) g
@@ -96,8 +120,9 @@ randomBoid g = randomR (minBoid, maxBoid) g
 rotateBoid :: Boid -> Boid
 rotateBoid (Boid _ pos vel orient) =
     let (Orientation angV ang dir ) = orient
-        newAng = if ang < 1 then (ang + (angV/1000)) else 0 in
-    Boid "Boid" pos vel (Orientation angV newAng dir)
+        newAng  = if ang < 1 then (ang + 0.0001) else 0 
+        newBoid = Boid boidGraphics pos vel (Orientation angV newAng dir) in
+    traceShow newBoid newBoid 
 
 sumVecList :: [Vect.V3 SwarmFloat] -> Vect.V3 SwarmFloat
 sumVecList xs = Vect.sumV xs

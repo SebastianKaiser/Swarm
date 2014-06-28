@@ -2,18 +2,18 @@ module SwopenGL.Display (idle, display) where
  
 import Graphics.UI.GLUT
 import Data.IORef
-import qualified SwarmLogic.GameWorld as GW
 import qualified SwarmLogic.Boid as Boid
-import qualified SwarmLogic.SceneTree as Scene
 import Graphics.GLUtil.Camera3D
 import Graphics.GLUtil.Linear
 import Data.Maybe
 import Linear.Matrix
+import qualified Linear.Metric as Metric (normalize)
 import Linear.V3
 import Linear.Quaternion
 import SwopenGL.Cube
+import SwarmLogic.GameWorld
 
-display :: IORef GW.GameWorld -> DisplayCallback
+display :: IORef GameWorld -> DisplayCallback
 display gwRef = do
   gw <- get gwRef 
   clear [ColorBuffer, DepthBuffer] 
@@ -29,19 +29,18 @@ display gwRef = do
   (eye4 :: M44 GLfloat) `asUniform` modelLoc
   cube 0.2
 
-  mapM_ (\boid -> do 
+  mapM_ (\boid -> do
           let orient  = Boid.orientation boid
-              rot     = fromQuaternion $ axisAngle (Boid.direction orient) (Boid.angle orient)
-              tramat  = mkTransformationMat eye3 (Boid.position boid)
-              rotmat  = mkTransformationMat rot (V3 0 0 0)
-              model   = tramat !*! rotmat 
+              rot     = fromQuaternion $ Metric.normalize $ axisAngle (Boid.direction orient) (Boid.angle orient)
+              model   = mkTransformationMat rot $ Boid.position boid
           model `asUniform` modelLoc 
+          -- threadDelay 100
           drawArrays LineLoop 0 3 ) $ gw              
 
   swapBuffers 
 
-idle :: IORef GW.GameWorld -> IdleCallback
+idle :: IORef GameWorld -> IdleCallback
 idle gwRef = do
   gw <- get gwRef
-  writeIORef gwRef $ GW.moveOn gw
+  writeIORef gwRef $ moveOn gw
   postRedisplay Nothing
